@@ -1,9 +1,9 @@
 /*
 	Project Name: Tbot's Discord Bot
 	Written By: Thomas Ruigrok
-    
-    Copyright 2019-2020 By Thomas Ruigrok.
-    
+
+    Copyright 2019-2021 By Thomas Ruigrok.
+
 	This Source Code Form is subject to the terms of the Mozilla Public
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -37,26 +37,31 @@ const LOG_FILE_PATH = "/home/pi/DiscordBot/logs/CmdLog.log";
 const ERROR_FILE_PATH = "/home/pi/DiscordBot/logs/Errors.log";
 
 // Declare Bot const variables
-const BOT_VERSION = '1.7.5';
+const BOT_VERSION = '2.1.5';
+const BOT_NAME = "Squishy Overlord Bot";
 const ADMIN_ROLE_NAME = "BotAdmin";
+const AUTHOR = "Thomas Ruigrok #8086";
 const CMD_PREFIX = '!!';
 const AdminCmdPrefix = '*!';
+
+// Other vars
+const MC_ENABLED = false;
 
 // Declare one-time assignment variables
 var DISCORD_LOGIN_TOKEN = 'TOKEN-AUTO-INJECTED-FROM-INIT';
 
 // Commands Arrays
-const CMDS = ['!!help', '!!ping', '!!cookie', '!!marco', '!!mcServer'];
-const CMDS_DESCRP = ["Srsly Becky? It's pretty obvious m8", "Pong!", "Give a cookie, Get a Cookie!", "Polo!", "Minecraft Server IPs"];
-const ADMINCMDS = ['*!reset', '*!shutdown'];
-const ADMINCMDS_DESCRP = ["Restarts the bot", "Stops the bot"];
+const CMDS = ['!!help', '!!Version', '!!ping', '!!cookie', '!!marco', '!!mcServer'];
+const CMDS_DESCRP = ["Srsly Becky? It's pretty obvious m8", "Displays the currently running Bot Version", "Pong!", "Give a cookie, Get a Cookie!", "Polo!", "Minecraft Server IPs"];
+const ADMINCMDS = ['*!reset', '*!shutdown', '*!ban', '*!mute'];
+const ADMINCMDS_DESCRP = ["Restarts the bot", "Stops the bot", "Bans a user", "Mutes a user"];
 
 /////////////////////////////////////////////////////////////////
 //MAIN                                                         //
 ////////////////////////////////////////////////////////////////
 
 //Load Discord Login Token from file & Login to discord
-init();
+Init();
 
 // On Client Ready, Send message to console
 client.on('ready', () => {
@@ -65,11 +70,18 @@ client.on('ready', () => {
 
 // When a message is received, check against available commands
 client.on('message', msg => {
-    //Set msg to lowercase for command Checking
-    msg = convertToLowercase(msg);
 
-    //Command Checking
-    checkForCommand(msg);
+    //Verify bot is not sending the message
+    if (msg.author.id != client.user.id) {
+
+        //Set msg to lowercase for command Checking
+        msg = ConvertToLowercase(msg);
+
+        //Moderation
+        Moderation(msg);
+        //Command Checking
+        CheckForCommand(msg);
+    }
 });
 
 
@@ -82,20 +94,21 @@ client.on('message', msg => {
 ////////////////////////////////////////////////////////////////
 
 
-function init() {
-    ConnectionCheck().then(function(){
-        if(readKeyFromFile()){
-           //login to client
-           client.login(DISCORD_LOGIN_TOKEN);
+function Init() {
+    console.log(GetBotInfo());
+    ConnectionCheck().then(function() {
+        if (ReadKeyFromFile()) {
+            //login to client
+            client.login(DISCORD_LOGIN_TOKEN);
         } else {
-           error_log("Can't load discord key token. Aborting...", -100, exitScript);
+            Error_log("Can't load discord key token. Aborting...", -100, exitScript);
         }
-    }).catch(function(){
-        error_log("Internet Connection unavailable. Aborting...", -404, exitScript);
+    }).catch(function() {
+        Error_log("Internet Connection unavailable. Aborting...", -404, exitScript);
     });
 }
 
-function readKeyFromFile() {
+function ReadKeyFromFile() {
     var keyLoaded = true;
 
     var keyFileData;
@@ -123,7 +136,11 @@ function readKeyFromFile() {
 ////////////////////////////////////////////////////////////////
 
 
-function checkForCommand(msg) {
+function Moderation(msg) {
+    MusicCommands(msg);
+}
+
+function CheckForCommand(msg) {
     if (msg.content === CMD_PREFIX + 'ping') {
         Ping(msg);
     } else if (msg.content === CMD_PREFIX + 'cookie') {
@@ -138,9 +155,29 @@ function checkForCommand(msg) {
         StopBot(msg);
     } else if (msg.content === CMD_PREFIX + 'help') {
         Help(msg);
-    } else if (wildcard(msg.content, '*bubblegum*')) {
+    } else if (Wildcard(msg.content, '*bubblegum*')) {
         BubbleGum(msg);
+    } else if (msg.content === CMD_PREFIX + 'version') {
+        GetInfo(msg);
     };
+}
+
+function MusicCommands(msg) {
+    const RYTHEM_CMDS = ["!play*", "!stop*", "!skip*", "!fs*"];
+    const MUSIC_CHANNEL_ID = "[REDACTED]";
+    var channelTag = "<#" + MUSIC_CHANNEL_ID + ">";
+
+    var replyMsg = "Music Commands can only be used in the " + channelTag + " Channel!";
+    var channel = msg.channel;
+    var currentChannelID = channel.id;
+
+    for (i = 0; i < RYTHEM_CMDS.length; i++) {
+        if (Wildcard(msg.content, RYTHEM_CMDS[i])) {
+            if (currentChannelID != MUSIC_CHANNEL_ID) {
+                msg.reply(replyMsg);
+            }
+        }
+    }
 }
 
 
@@ -161,6 +198,11 @@ function Help(msg) {
     msg.reply(response);
 }
 
+function GetInfo(msg) {
+    var channel = msg.channel;
+    channel.send(GetBotInfo());
+}
+
 
 function Ping(msg) {
     msg.reply('pong');
@@ -178,7 +220,10 @@ function Marco_polo(msg) {
 
 
 function MinecraftIPs(msg) {
-    msg.reply('\n Main MC Server: N/A \n Backup MC Server: N/A \n Skyblock MC Server (MC Version 1.??): N/A');
+    if (MC_ENABLED)
+        msg.reply('\n Main MC Server: [REDACTED]');
+    else
+        msg.reply('NO MC Servers Available');
 }
 
 
@@ -210,10 +255,10 @@ function CheckUserRole(msg) {
 
 function ResetBot(msg) {
     var channel = msg.channel;
-    
+
     //Create log entry
     AdminCmdLog(msg, "reset");
-    
+
     //Validate User role
     if (CheckUserRole(msg)) {
         // send channel a message that you're resetting bot
@@ -228,18 +273,18 @@ function ResetBot(msg) {
 
 function StopBot(msg) {
     var channel = msg.channel;
-    
+
     //Create log entry
     AdminCmdLog(msg, "shutdown");
 
     //Validate User role
     if (CheckUserRole(msg)) {
         // send channel a message that you're stopping bot
-        
+
         channel.send('Bot Shutting Down...')
             .then(msg => client.destroy())
             .then(() => process.exit(0));
-        
+
     } else {
         msg.reply("You don't have permission to use that command. You must have the role of:  `" + ADMIN_ROLE_NAME + "`");
     }
@@ -251,19 +296,23 @@ function StopBot(msg) {
 ////////////////////////////////////////////////////////////////
 
 //Wildcard Regex Test
-function wildcard(message, rule) {
+function Wildcard(message, rule) {
     var escapeRegex = (message) => message.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
     return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(message);
 }
 
+function GetBotInfo() {
+    var returnStr = BOT_NAME + " Version " + BOT_VERSION + '\n' + "Author: " + AUTHOR;
+    return returnStr;
+}
 
-function convertUTCDateToLocalDate(date) {
-    var newDate = new Date(date.getTime() - date.getTimezoneOffset()*60*1000);
-    return newDate;   
+function ConvertUTCDateToLocalDate(date) {
+    var newDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+    return newDate;
 }
 
 
-function convertToLowercase(msg) {
+function ConvertToLowercase(msg) {
     // Convert msg to lowercase
     msg.content = msg.content.toLowerCase();
 
@@ -272,16 +321,16 @@ function convertToLowercase(msg) {
 }
 
 
-function AdminCmdLog(msg, cmdRcvd){
+function AdminCmdLog(msg, cmdRcvd) {
     //Declare vars
     var date = new Date();
-    var time = time_pad(date.getUTCHours()) + ":" + time_pad(date.getUTCMinutes());
-    var localTime = time_pad(date.getHours()) + ":" + time_pad(date.getMinutes());
+    var time = TimePad(date.getUTCHours()) + ":" + TimePad(date.getUTCMinutes());
+    var localTime = TimePad(date.getHours()) + ":" + TimePad(date.getMinutes());
     var user = msg.member.user.tag;
-    
+
     //Command Received: 04/04/2020 @ 22:49 (UTC: 04:49) By: tbot1887#1234 -- Command Issued: reset
-    var logString = "Command Received: " + time_pad((date.getMonth()+1)) + "/" + time_pad(date.getDate()) + "/" + date.getFullYear() + " @ " 
-        + localTime + "(UTC: " + time + ") By: " + user + " -- Command Issued: " + cmdRcvd;
+    var logString = "Command Received: " + TimePad((date.getMonth() + 1)) + "/" + TimePad(date.getDate()) + "/" + date.getFullYear() + " @ " +
+        localTime + "(UTC: " + time + ") By: " + user + " -- Command Issued: " + cmdRcvd;
 
     //Write Logfile to file @ console
     console.log(logString);
@@ -294,21 +343,21 @@ function AdminCmdLog(msg, cmdRcvd){
 }
 
 
-function time_pad(n) {
+function TimePad(n) {
     return String("00" + n).slice(-2);
 }
 
 
-function error_log(errorMsg, errorCode, callback){
+function Error_log(errorMsg, errorCode, callback) {
     //Set Exit (STOP) Code
     process.exitCode = errorCode;
 
     //create log string
     var logString = "STOP CODE: " + errorCode + " - Details: " + errorMsg;
-    
+
     //Write Logfile to file @ console
     console.log(logString);
-    
+
     //Open Log File & Write too it
     try {
         fs.appendFileSync(ERROR_FILE_PATH, logString + '\n');
@@ -318,11 +367,11 @@ function error_log(errorMsg, errorCode, callback){
     }
 
     //Callback function
-    if (typeof callback == "function") 
-        callback(); 
+    if (typeof callback == "function")
+        callback();
 }
 
 
-function exitScript(){
+function exitScript() {
     process.exit();
 }
