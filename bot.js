@@ -245,7 +245,17 @@ function BubbleGum(msg) {
 function CheckUserRole(msg) {
     var returnVar = false;
     //Validate user has sufficient permissions
+    /* Discord.js V11.6.4 Code
     if (msg.guild.roles.find(role => role.name === ADMIN_ROLE_NAME)) {
+        returnVar = true;
+    }
+    */
+
+    //Discord.js V12.5.1
+    let adminRole = msg.guild.roles.cache.find(role => role.name === ADMIN_ROLE_NAME);
+
+    if(msg.member.roles.cache.has(adminRole.id))
+    {
         returnVar = true;
     }
 
