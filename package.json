@@ -5,7 +5,8 @@
   "main": "bot.js",
   "dependencies": {
     "discord.js": "^11.6.3",
-    "internet-available": "^1.0.0"
+    "internet-available": "^1.0.0",
+    "sqlite3": "^5.0.2"
   },
   "devDependencies": {},
   "scripts": {
