@@ -1,4 +1,5 @@
 *.key
 *.bat
 *.sh
+*.ini
 /logs/*.log
