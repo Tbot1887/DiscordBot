@@ -33,9 +33,9 @@ const ConnectionCheck = require('internet-available');
 const fetch = require('node-fetch');
 
 //Declare other const variables
-const KEY_FILE_NAME = "/home/pi/DiscordBot/DiscordLoginToken.key";
-const LOG_FILE_PATH = "/home/pi/DiscordBot/logs/CmdLog.log";
-const ERROR_FILE_PATH = "/home/pi/DiscordBot/logs/Errors.log";
+const KEY_FILE_NAME = "DiscordLoginToken.key";
+const LOG_FILE_PATH = "logs/CmdLog.log";
+const ERROR_FILE_PATH = "logs/Errors.log";
 
 // Declare Bot const variables
 const BOT_VERSION = '2.1.5';
@@ -47,6 +47,7 @@ const AdminCmdPrefix = '*!';
 
 // Other vars
 const MC_ENABLED = false;
+const JOKE_API = "https://official-joke-api.appspot.com/jokes/random";
 //Music Channel ID (For Music Command Moderation)
 const MUSIC_CHANNEL_ID = "[REDACTED]";
 
@@ -54,8 +55,8 @@ const MUSIC_CHANNEL_ID = "[REDACTED]";
 var DISCORD_LOGIN_TOKEN = 'TOKEN-AUTO-INJECTED-FROM-INIT';
 
 // Commands Arrays
-const CMDS = ['!!help', '!!Version', '!!ping', '!!cookie', '!!marco', '!!mcServer'];
-const CMDS_DESCRP = ["Srsly Becky? It's pretty obvious m8", "Displays the currently running Bot Version", "Pong!", "Give a cookie, Get a Cookie!", "Polo!", "Minecraft Server IPs"];
+const CMDS = ['!!help', '!!Version', '!!ping', '!!cookie', '!!marco', '!!mcServer', '!!joke'];
+const CMDS_DESCRP = ["Srsly Becky? It's pretty obvious m8", "Displays the currently running Bot Version", "Pong!", "Give a cookie, Get a Cookie!", "Polo!", "Minecraft Server IPs", 'Replies with a random joke'];
 const ADMINCMDS = ['*!reset', '*!shutdown', '*!ban', '*!mute'];
 const ADMINCMDS_DESCRP = ["Restarts the bot", "Stops the bot", "Bans a user", "Mutes a user"];
 
@@ -180,6 +181,8 @@ function CheckForCommand(msg) {
         BubbleGum(msg);
     } else if (msg.content === CMD_PREFIX + 'version') {
         GetInfo(msg);
+    } else if (msg.content === CMD_PREFIX + 'joke') {
+        TellMeAJoke(msg);
     };
 }
 
@@ -295,6 +298,33 @@ function RockPaperScissors(msg) {
     	}
     	else{
     	} */
+}
+
+/**
+ * the Joke Command - Create a Fetch Request to the Official Joke API & Responds with a joke
+ * @param {object} msg - Discord.js Message Object
+ */
+function TellMeAJoke(msg) {
+    let channel = msg.channel;
+    let joke = null;
+
+    //Fetch Request
+    fetch(JOKE_API)
+        .then((response) => {
+            //Check the response status code
+            if(response.status !== 200)
+                throw Error(response.statusText);
+            else
+                return response.json();
+        })
+        .then((jsonResponse) => {
+            joke = jsonResponse;
+            
+            channel.send(joke.setup.toString())
+            setTimeout(() => {channel.send(joke.punchline.toString())},3000)
+        }).catch((error) => {
+            channel.send("I encountered an error: Here are the details: \n" + error.message + "\n Please try again later...");
+    });
 }
 
 
