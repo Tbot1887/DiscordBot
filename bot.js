@@ -30,6 +30,7 @@ const client = new Discord.Client();
 //Declare other integration variables
 const fs = require('fs');
 const ConnectionCheck = require('internet-available');
+const fetch = require('node-fetch');
 
 //Declare other const variables
 const KEY_FILE_NAME = "/home/pi/DiscordBot/DiscordLoginToken.key";

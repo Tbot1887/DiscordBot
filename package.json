@@ -6,6 +6,7 @@
   "dependencies": {
     "discord.js": "^12.5.1",
     "internet-available": "^1.0.0",
+    "node-fetch": "^2.6.1",
     "sqlite3": "^5.0.2"
   },
   "devDependencies": {},
