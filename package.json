@@ -4,7 +4,7 @@
   "description": "My First Discord Bot",
   "main": "bot.js",
   "dependencies": {
-    "discord.js": "^11.6.4",
+    "discord.js": "^12.5.1",
     "internet-available": "^1.0.0",
     "sqlite3": "^5.0.2"
   },
