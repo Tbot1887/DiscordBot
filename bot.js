@@ -18,10 +18,10 @@
 /////////////////////////////////////////////////////////////////
 
 
-
 /////////////////////////////////////////////////////////////////
 //Variable declarations below this line                        //
 ////////////////////////////////////////////////////////////////
+
 
 //Declare Discord Integration variables
 const Discord = require('discord.js');
@@ -58,9 +58,11 @@ const CMDS_DESCRP = ["Srsly Becky? It's pretty obvious m8", "Displays the curren
 const ADMINCMDS = ['*!reset', '*!shutdown', '*!ban', '*!mute'];
 const ADMINCMDS_DESCRP = ["Restarts the bot", "Stops the bot", "Bans a user", "Mutes a user"];
 
+
 /////////////////////////////////////////////////////////////////
 //MAIN                                                         //
 ////////////////////////////////////////////////////////////////
+
 
 //Load Discord Login Token from file & Login to discord
 Init();
@@ -94,6 +96,7 @@ client.on('message', msg => {
 /////////////////////////////////////////////////////////////////
 //INITIALIZATION functions below this line                     //
 ////////////////////////////////////////////////////////////////
+
 
 /**
  * Initialization Function to load application variables
@@ -143,6 +146,7 @@ function ReadKeyFromFile() {
 //Cammand Functions below this line                            //
 ////////////////////////////////////////////////////////////////
 
+
 /**
  * Run Moderation functions
  * @param {object} msg - Discord.js Message Object
@@ -150,6 +154,7 @@ function ReadKeyFromFile() {
 function Moderation(msg) {
     MusicCommands(msg);
 }
+
 
 /**
  * Check for a valid command
@@ -176,6 +181,7 @@ function CheckForCommand(msg) {
         GetInfo(msg);
     };
 }
+
 
 /**
  * Checks to see if user is sending a command to Rythem outside of the music channel
@@ -205,6 +211,7 @@ function MusicCommands(msg) {
     }
 }
 
+
 /**
  * The Help Command - Lists available commands
  * @param {object} msg - Discord.js Message Object 
@@ -226,6 +233,7 @@ function Help(msg) {
     msg.reply(response);
 }
 
+
 /**
  * the Version command - Lists information about the bot (IE. Current Version & Author)
  * @param {object} msg - Discord.js Message Object
@@ -244,6 +252,7 @@ function Ping(msg) {
     msg.reply('pong');
 }
 
+
 /**
  * the Cookie Command - Replies with a cookie Emoticon
  * @param {object} msg 
@@ -261,6 +270,7 @@ function Marco_polo(msg) {
     msg.reply('Polo!');
 }
 
+
 /**
  * the MCServer Command - If MC_ENABLED is true. Print the Minecraft server IP(s)
  * @param {object} msg - Discord.js Message Object
@@ -271,6 +281,7 @@ function MinecraftIPs(msg) {
     else
         msg.reply('NO MC Servers Available');
 }
+
 
 /**
  * First attempt at a game (Not in use)
@@ -284,6 +295,7 @@ function RockPaperScissors(msg) {
     	else{
     	} */
 }
+
 
 /**
  * replies to any message containing the word 'bubblegum' with the bubblegum meme
@@ -316,6 +328,7 @@ function ResetBot(msg) {
     }
 }
 
+
 /**
  * Admin Command to shutdown the bot
  * @param {object} msg - Discord.js Message Object 
@@ -344,6 +357,7 @@ function StopBot(msg) {
 //Utility Functions below this line                            //
 ////////////////////////////////////////////////////////////////
 
+
 /**
  * Utility function to check if a user has a role
  * @param {object} msg - Discord.js Message Object
@@ -369,6 +383,7 @@ function CheckUserRole(msg) {
     return returnVar;
 }
 
+
 /**
  * Determines if a message contains the rule specified
  * @param {string} message - Discord Message Contents
@@ -380,6 +395,7 @@ function Wildcard(message, rule) {
     return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(message);
 }
 
+
 /**
  * Helper Function to combine bot Info into a single string
  * @returns {string} Bot Info String
@@ -388,6 +404,7 @@ function GetBotInfo() {
     var returnStr = BOT_NAME + " Version " + BOT_VERSION + '\n' + "Author: " + AUTHOR;
     return returnStr;
 }
+
 
 /**
  * Converts UTC Date to a Local Date
@@ -398,6 +415,7 @@ function ConvertUTCDateToLocalDate(date) {
     var newDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
     return newDate;
 }
+
 
 /**
  * Converts a Discord message to lowercase
@@ -411,6 +429,7 @@ function ConvertToLowercase(msg) {
     //Return the changed message
     return msg;
 }
+
 
 /**
  * Logs an admin command to a log file & discord channel
@@ -438,6 +457,7 @@ function AdminCmdLog(msg, cmdRcvd) {
     }
 }
 
+
 /**
  * Pads a number with a leading zero
  * @param {number} n - The number to be padded
@@ -446,6 +466,7 @@ function AdminCmdLog(msg, cmdRcvd) {
 function TimePad(n) {
     return String("00" + n).slice(-2);
 }
+
 
 /**
  * Logs an error occurrence to a file & sets an exit code
@@ -475,6 +496,7 @@ function Error_log(errorMsg, errorCode, callback) {
     if (typeof callback == "function")
         callback();
 }
+
 
 /**
  * Function to exit a script.
