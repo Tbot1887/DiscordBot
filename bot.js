@@ -38,12 +38,12 @@ const LOG_FILE_PATH = "logs/CmdLog.log";
 const ERROR_FILE_PATH = "logs/Errors.log";
 
 // Declare Bot const variables
-const BOT_VERSION = '2.1.5';
+const BOT_VERSION = '2.2.0';
 const BOT_NAME = "Squishy Overlord Bot";
 const ADMIN_ROLE_NAME = "BotAdmin";
 const AUTHOR = "Thomas Ruigrok #8086";
 const CMD_PREFIX = '!!';
-const AdminCmdPrefix = '*!';
+const AdminCmdPrefix = '#!';
 
 // Other vars
 const MC_ENABLED = false;
@@ -55,10 +55,10 @@ const MUSIC_CHANNEL_ID = "[REDACTED]";
 var DISCORD_LOGIN_TOKEN = 'TOKEN-AUTO-INJECTED-FROM-INIT';
 
 // Commands Arrays
-const CMDS = ['!!help', '!!Version', '!!ping', '!!cookie', '!!marco', '!!mcServer', '!!joke'];
+const CMDS = ['help', 'Version', 'ping', 'cookie', 'marco', 'mcServer', 'joke'];
 const CMDS_DESCRP = ["Srsly Becky? It's pretty obvious m8", "Displays the currently running Bot Version", "Pong!", "Give a cookie, Get a Cookie!", "Polo!", "Minecraft Server IPs", 'Replies with a random joke'];
-const ADMINCMDS = ['*!reset', '*!shutdown', '*!ban', '*!mute'];
-const ADMINCMDS_DESCRP = ["Restarts the bot", "Stops the bot", "Bans a user", "Mutes a user"];
+const ADMINCMDS = ['reset', 'shutdown', 'mute', 'kick', 'ban'];
+const ADMINCMDS_DESCRP = ["Restarts the bot", "Stops the bot", "Mutes a user", 'Kicks a user', "Bans a user"];
 
 
 /////////////////////////////////////////////////////////////////
@@ -171,10 +171,6 @@ function CheckForCommand(msg) {
         Marco_polo(msg);
     } else if (msg.content === CMD_PREFIX + 'mcserver') {
         MinecraftIPs(msg);
-    } else if (msg.content === AdminCmdPrefix + 'reset') {
-        ResetBot(msg);
-    } else if (msg.content === AdminCmdPrefix + 'shutdown') {
-        StopBot(msg);
     } else if (msg.content === CMD_PREFIX + 'help') {
         Help(msg);
     } else if (Wildcard(msg.content, '*bubblegum*')) {
@@ -183,6 +179,16 @@ function CheckForCommand(msg) {
         GetInfo(msg);
     } else if (msg.content === CMD_PREFIX + 'joke') {
         TellMeAJoke(msg);
+    } else if (msg.content === AdminCmdPrefix + 'reset') {
+        ResetBot(msg);
+    } else if (msg.content === AdminCmdPrefix + 'shutdown') {
+        StopBot(msg);
+    } else if(Wildcard(msg.content, AdminCmdPrefix + 'mute*')) {
+        MuteUser(msg);
+    } else if(Wildcard(msg.content, AdminCmdPrefix + 'kick*')) {
+        KickUser(msg);
+    } else if(Wildcard(msg.content, AdminCmdPrefix + 'ban*')) {
+        BanUser(msg);
     };
 }
 
@@ -224,13 +230,13 @@ function Help(msg) {
     //Regular Commands
     response = '\n' + "Available Commands" + '\n' + "-------------------\n";
     for (i = 0; i < CMDS.length; i++) {
-        response += CMDS[i] + " - " + CMDS_DESCRP[i] + '\n';
+        response += CMD_PREFIX + CMDS[i] + " - " + CMDS_DESCRP[i] + '\n';
     }
 
     //Admin Commands
     response += "\n ADMIN Commands" + '\n' + "-------------------\n";
     for (i = 0; i < ADMINCMDS.length; i++) {
-        response += ADMINCMDS[i] + " - " + ADMINCMDS_DESCRP[i] + '\n';
+        response += AdminCmdPrefix + ADMINCMDS[i] + " - " + ADMINCMDS_DESCRP[i] + '\n';
     }
 
     //Reply
@@ -319,7 +325,7 @@ function TellMeAJoke(msg) {
         })
         .then((jsonResponse) => {
             joke = jsonResponse;
-            
+
             channel.send(joke.setup.toString())
             setTimeout(() => {channel.send(joke.punchline.toString())},3000)
         }).catch((error) => {
@@ -381,6 +387,38 @@ function StopBot(msg) {
     } else {
         msg.reply("You don't have permission to use that command. You must have the role of:  `" + ADMIN_ROLE_NAME + "`");
     }
+}
+
+
+/**
+ * Admin Command to mute a user
+ * Not Implemented Yet!
+ * @param {object} msg - Discord.js Message Object 
+ */
+function MuteUser(msg)
+{
+    msg.reply(NotImplemented());
+}
+
+
+/**
+ * Admin Command to kick a user
+ * Not Implemented Yet!
+ * @param {object} msg - Discord.js Message Object 
+ */
+function KickUser(msg)
+{
+    msg.reply(NotImplemented());
+}
+
+/**
+ * Admin Command to ban a user
+ * Not Implemented Yet!
+ * @param {object} msg - Discord.js Message Object 
+ */
+function BanUser(msg)
+{
+    msg.reply(NotImplemented());
 }
 
 
@@ -496,6 +534,15 @@ function AdminCmdLog(msg, cmdRcvd) {
  */
 function TimePad(n) {
     return String("00" + n).slice(-2);
+}
+
+
+/**
+ * Returns a non implemented yet message
+ * @returns {string} Command is not implemented yet!
+ */
+function NotImplemented() {
+    return "Command is not implemented yet!"
 }
 
 
